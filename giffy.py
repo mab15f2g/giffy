@@ -4,6 +4,9 @@ from tkinter import Tk, Button, Label, filedialog, Scale, HORIZONTAL
 from moviepy.editor import VideoFileClip
 from concurrent.futures import ThreadPoolExecutor
 
+input_folder = ""
+output_folder = ""
+
 def convert_to_gif(video_path, output_folder, quality, frame_rate):
     video_name = os.path.splitext(os.path.basename(video_path))[0]
     output_path = os.path.join(output_folder, f"{video_name}.gif")
@@ -12,14 +15,23 @@ def convert_to_gif(video_path, output_folder, quality, frame_rate):
     clip.write_gif(output_path, fps=frame_rate, opt=quality)
     clip.close()
 
-def select_folder():
-    root = Tk()
-    root.withdraw()
-    folder_path = filedialog.askdirectory()
-    root.destroy()
-    return folder_path
+def select_input_folder():
+    global input_folder
+    input_folder = filedialog.askdirectory()
 
-def convert_videos_to_gifs(input_folder, output_folder, quality, frame_rate):
+def select_output_folder():
+    global output_folder
+    output_folder = filedialog.askdirectory()
+
+def convert_videos_to_gifs(quality, frame_rate):
+    if not input_folder:
+        print("No input folder selected.")
+        return
+    
+    if not output_folder:
+        print("No output folder selected.")
+        return
+    
     pool = ThreadPoolExecutor(max_workers=int(multiprocessing.cpu_count() * 0.75))
     
     for file_name in os.listdir(input_folder):
@@ -32,16 +44,6 @@ def convert_videos_to_gifs(input_folder, output_folder, quality, frame_rate):
     print("Conversion completed.")
 
 def main():
-    input_folder = select_folder()
-    if not input_folder:
-        print("No folder selected.")
-        return
-    
-    output_folder = select_folder()
-    if not output_folder:
-        print("No output folder selected.")
-        return
-    
     root = Tk()
     root.title("GIF Converter")
     
@@ -57,13 +59,13 @@ def main():
     frame_rate_scale = Scale(root, from_=1, to=30, orient=HORIZONTAL)
     frame_rate_scale.pack()
     
-    def convert_videos():
-        quality = quality_scale.get()
-        frame_rate = frame_rate_scale.get()
-        root.destroy()
-        convert_videos_to_gifs(input_folder, output_folder, quality, frame_rate)
+    input_button = Button(root, text="Select Input Folder", command=select_input_folder)
+    input_button.pack()
     
-    convert_button = Button(root, text="Convert", command=convert_videos)
+    output_button = Button(root, text="Select Output Folder", command=select_output_folder)
+    output_button.pack()
+    
+    convert_button = Button(root, text="Convert", command=lambda: convert_videos_to_gifs(quality_scale.get(), frame_rate_scale.get()))
     convert_button.pack()
     
     root.mainloop()
