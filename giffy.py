@@ -43,6 +43,12 @@ def convert_videos_to_gifs(quality, frame_rate):
     pool.shutdown(wait=True)
     print("Conversion completed.")
 
+def get_short_path(path):
+    short_path = os.path.basename(path)
+    if len(short_path) > 20:
+        short_path = '...' + short_path[-20:]
+    return short_path
+
 def main():
     root = Tk()
     root.title("GIF Converter")
@@ -68,6 +74,12 @@ def main():
     
     output_button = Button(root, text="Select Output Folder", command=select_output_folder)
     output_button.pack(side="right", padx=20, pady=10)
+    
+    input_label = Label(root, text=f"Input Folder: {get_short_path(input_folder)}")
+    input_label.pack(anchor="w")
+    
+    output_label = Label(root, text=f"Output Folder: {get_short_path(output_folder)}")
+    output_label.pack(anchor="w")
     
     root.mainloop()
 
