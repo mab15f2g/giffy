@@ -7,7 +7,7 @@ def convert_to_gif(video_path, output_folder, quality, frame_rate):
     output_path = os.path.join(output_folder, f"{video_name}.gif")
     
     clip = VideoFileClip(video_path)
-    clip.write_gif(output_path, fps=frame_rate, quality=quality)
+    clip.write_gif(output_path, fps=frame_rate, opt=quality)
     clip.close()
 
 def select_folder():
