@@ -46,6 +46,7 @@ def convert_videos_to_gifs(quality, frame_rate):
 def main():
     root = Tk()
     root.title("GIF Converter")
+    root.geometry("640x480")
     
     quality_label = Label(root, text="Quality")
     quality_label.pack()
