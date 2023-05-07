@@ -3,6 +3,7 @@ import subprocess
 # List of dependencies
 dependencies = [
     'moviepy', 
+    'tkinter', 
 
 ]
 
