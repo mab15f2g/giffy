@@ -1,6 +1,8 @@
 import os
+import multiprocessing
 from tkinter import Tk, Button, Label, filedialog, Scale, HORIZONTAL
 from moviepy.editor import VideoFileClip
+from concurrent.futures import ThreadPoolExecutor
 
 def convert_to_gif(video_path, output_folder, quality, frame_rate):
     video_name = os.path.splitext(os.path.basename(video_path))[0]
@@ -18,11 +20,16 @@ def select_folder():
     return folder_path
 
 def convert_videos_to_gifs(input_folder, output_folder, quality, frame_rate):
+    pool = ThreadPoolExecutor(max_workers=int(multiprocessing.cpu_count() * 0.75))
+    
     for file_name in os.listdir(input_folder):
         if file_name.endswith(('.mp4', '.avi', '.mov')):
             video_path = os.path.join(input_folder, file_name)
-            convert_to_gif(video_path, output_folder, quality, frame_rate)
-            print(f"Converted {file_name} to GIF.")
+            pool.submit(convert_to_gif, video_path, output_folder, quality, frame_rate)
+            print(f"Converting {file_name} to GIF.")
+    
+    pool.shutdown(wait=True)
+    print("Conversion completed.")
 
 def main():
     input_folder = select_folder()
@@ -55,7 +62,6 @@ def main():
         frame_rate = frame_rate_scale.get()
         root.destroy()
         convert_videos_to_gifs(input_folder, output_folder, quality, frame_rate)
-        print("Conversion completed.")
     
     convert_button = Button(root, text="Convert", command=convert_videos)
     convert_button.pack()
