@@ -49,25 +49,25 @@ def main():
     root.geometry("640x480")
     
     quality_label = Label(root, text="Quality")
-    quality_label.pack()
+    quality_label.pack(anchor="w")
     
     quality_scale = Scale(root, from_=1, to=10, orient=HORIZONTAL)
-    quality_scale.pack()
+    quality_scale.pack(fill="x", padx=80)
     
     frame_rate_label = Label(root, text="Frame Rate")
-    frame_rate_label.pack()
+    frame_rate_label.pack(anchor="w")
     
     frame_rate_scale = Scale(root, from_=1, to=30, orient=HORIZONTAL)
-    frame_rate_scale.pack()
-    
-    input_button = Button(root, text="Select Input Folder", command=select_input_folder)
-    input_button.pack()
-    
-    output_button = Button(root, text="Select Output Folder", command=select_output_folder)
-    output_button.pack()
+    frame_rate_scale.pack(fill="x", padx=80)
     
     convert_button = Button(root, text="Convert", command=lambda: convert_videos_to_gifs(quality_scale.get(), frame_rate_scale.get()))
-    convert_button.pack()
+    convert_button.pack(side="bottom")
+    
+    input_button = Button(root, text="Select Input Folder", command=select_input_folder)
+    input_button.pack(side="left", padx=20, pady=10)
+    
+    output_button = Button(root, text="Select Output Folder", command=select_output_folder)
+    output_button.pack(side="right", padx=20, pady=10)
     
     root.mainloop()
 
