@@ -1,87 +1,90 @@
 import os
-import multiprocessing
-from tkinter import Tk, Button, Label, filedialog, Scale, HORIZONTAL
-from moviepy.editor import VideoFileClip
-from concurrent.futures import ThreadPoolExecutor
+import subprocess
+import shutil
+import tkinter as tk
+from tkinter import filedialog
+from tkinter.ttk import Progressbar  # Import Progressbar from ttk
 
-input_folder = ""
-output_folder = ""
+def komprimiere_video(datei_pfad, ziel_datei_pfad):
+    print(f"Generiere GIF aus {datei_pfad}...")  # Display progress
+    ziel_datei_pfad_gif = os.path.splitext(ziel_datei_pfad)[0] + '.gif'
+    kommando = ['ffmpeg', '-i', datei_pfad, '-vf', 'scale=640:-1:flags=lanczos,fps=20', ziel_datei_pfad_gif]
+    subprocess.run(kommando, capture_output=True, text=True)
 
-def convert_to_gif(video_path, output_folder, quality, frame_rate):
-    video_name = os.path.splitext(os.path.basename(video_path))[0]
-    output_path = os.path.join(output_folder, f"{video_name}.gif")
-    
-    clip = VideoFileClip(video_path)
-    clip.write_gif(output_path, fps=frame_rate, opt=quality)
-    clip.close()
+def komprimiere_ordnerstruktur(quellpfad, zielpfad):
+    for ordnername, unterordner, dateien in os.walk(quellpfad):
+        # Erzeuge den Zielordner, wenn er nicht vorhanden ist
+        zielordner = os.path.join(zielpfad, os.path.relpath(ordnername, quellpfad))
+        if not os.path.exists(zielordner):
+            os.makedirs(zielordner)
 
-def select_input_folder():
-    global input_folder
-    input_folder = filedialog.askdirectory()
+        # Komprimiere und kopiere jede Videodatei in den Zielordner
+        for index, datei in enumerate(dateien, start=1):
+            datei_pfad = os.path.join(ordnername, datei)
+            ziel_datei_pfad = os.path.join(zielordner, datei)
+            
+            if os.path.exists(ziel_datei_pfad):
+                print(f"Die Zieldatei {ziel_datei_pfad} existiert bereits. Überspringe das Komprimieren.")
+            else:
+                if datei.endswith(('.mp4', '.avi', '.mkv', '.mov', '.wmv', '.flv', '.webm')):  # Nur Dateien mit diesen Endungen komprimieren
+                    komprimiere_video(datei_pfad, ziel_datei_pfad)
+                else:
+                    # Kopiere andere Dateien einfach in den Zielordner
+                    shutil.copy2(datei_pfad, ziel_datei_pfad)
+            
+            # Fortschritt anzeigen
+            prozent = int(index / len(dateien) * 100)  # Berechne den Fortschritt in Prozent
+            print(f"Fortschritt des Ordners: {prozent}%")  # Zeige den Fortschritt in der Konsole an
+            update_progress(prozent)
 
-def select_output_folder():
-    global output_folder
-    output_folder = filedialog.askdirectory()
+def choose_source_directory():
+    source_dir = filedialog.askdirectory()
+    source_dir_entry.delete(0, tk.END)
+    source_dir_entry.insert(0, source_dir)
 
-def convert_videos_to_gifs(quality, frame_rate):
-    if not input_folder:
-        print("No input folder selected.")
-        return
-    
-    if not output_folder:
-        print("No output folder selected.")
-        return
-    
-    pool = ThreadPoolExecutor(max_workers=int(multiprocessing.cpu_count() * 0.75))
-    
-    for file_name in os.listdir(input_folder):
-        if file_name.endswith(('.mp4', '.avi', '.mov')):
-            video_path = os.path.join(input_folder, file_name)
-            pool.submit(convert_to_gif, video_path, output_folder, quality, frame_rate)
-            print(f"Converting {file_name} to GIF.")
-    
-    pool.shutdown(wait=True)
-    print("Conversion completed.")
+def choose_destination_directory():
+    dest_dir = filedialog.askdirectory()
+    dest_dir_entry.delete(0, tk.END)
+    dest_dir_entry.insert(0, dest_dir)
 
-def get_short_path(path):
-    short_path = os.path.basename(path)
-    if len(short_path) > 20:
-        short_path = '...' + short_path[-20:]
-    return short_path
+# Function to update the progress bar
+def update_progress(progress_value):
+    progress_bar["value"] = progress_value
+    app.update_idletasks()
 
-def main():
-    root = Tk()
-    root.title("GIF Converter")
-    root.geometry("640x480")
-    
-    quality_label = Label(root, text="Quality")
-    quality_label.pack(anchor="w")
-    
-    quality_scale = Scale(root, from_=1, to=10, orient=HORIZONTAL)
-    quality_scale.pack(fill="x", padx=80)
-    
-    frame_rate_label = Label(root, text="Frame Rate")
-    frame_rate_label.pack(anchor="w")
-    
-    frame_rate_scale = Scale(root, from_=1, to=30, orient=HORIZONTAL)
-    frame_rate_scale.pack(fill="x", padx=80)
-    
-    convert_button = Button(root, text="Convert", command=lambda: convert_videos_to_gifs(quality_scale.get(), frame_rate_scale.get()))
-    convert_button.pack(side="bottom")
-    
-    input_button = Button(root, text="Select Input Folder", command=select_input_folder)
-    input_button.pack(side="left", padx=20, pady=10)
-    
-    output_button = Button(root, text="Select Output Folder", command=select_output_folder)
-    output_button.pack(side="right", padx=20, pady=10)
-    
-    input_label = Label(root, text=f"Input Folder: {get_short_path(input_folder)}")
-    input_label.pack(anchor="w")
-    
-    output_label = Label(root, text=f"Output Folder: {get_short_path(output_folder)}")
-    output_label.pack(anchor="w")
-    
-    root.mainloop()
+def compress_button_click():
+    source_dir = source_dir_entry.get()
+    dest_dir = dest_dir_entry.get()
+    komprimiere_ordnerstruktur(source_dir, dest_dir)
 
-if __name__ == '__main__':
-    main()
+# Create the main application window
+app = tk.Tk()
+app.geometry("500x400")  # Adjusted height to accommodate the progress bar
+app.title("Video Kompressionswerkzeug")
+
+# Add source directory entry and button
+source_label = tk.Label(app, text="Quellverzeichnis:")  # Source Directory in German
+source_label.pack()
+source_dir_entry = tk.Entry(app)
+source_dir_entry.pack()
+source_dir_button = tk.Button(app, text="Quellverzeichnis auswählen", command=choose_source_directory)  # Choose Source Directory in German
+source_dir_button.pack()
+
+# Add destination directory entry and button
+dest_label = tk.Label(app, text="Zielverzeichnis:")  # Destination Directory in German
+dest_label.pack()
+dest_dir_entry = tk.Entry(app)
+dest_dir_entry.pack()
+dest_dir_button = tk.Button(app, text="Zielverzeichnis auswählen", command=choose_destination_directory)  # Choose Destination Directory in German
+dest_dir_button.pack()
+
+# Add compress button
+compress_button = tk.Button(app, text="Videos komprimieren", command=compress_button_click)  # Compress Videos in German
+compress_button.pack()
+
+# Add a Progressbar
+progress_bar = Progressbar(app, length=300, mode="determinate")
+progress_bar.pack()
+
+# Start the GUI application
+app.mainloop()
