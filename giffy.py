@@ -22,8 +22,8 @@ def komprimiere_ordnerstruktur(quellpfad, zielpfad):
         for index, datei in enumerate(dateien, start=1):
             datei_pfad = os.path.join(ordnername, datei)
             ziel_datei_pfad = os.path.join(zielordner, datei)
-            
-            if os.path.exists(ziel_datei_pfad):
+            print(ziel_datei_pfad)
+            if os.path.exists(os.path.join(ordnername, datei)):
                 print(f"Die Zieldatei {ziel_datei_pfad} existiert bereits. Überspringe das Komprimieren.")
             else:
                 if datei.endswith(('.mp4', '.avi', '.mkv', '.mov', '.wmv', '.flv', '.webm')):  # Nur Dateien mit diesen Endungen komprimieren
