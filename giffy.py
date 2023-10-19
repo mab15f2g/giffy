@@ -79,7 +79,7 @@ dest_dir_button = tk.Button(app, text="Zielverzeichnis auswählen", command=choo
 dest_dir_button.pack()
 
 # Add compress button
-compress_button = tk.Button(app, text="Videos komprimieren", command=compress_button_click)  # Compress Videos in German
+compress_button = tk.Button(app, text="Gifs erstellen", command=compress_button_click)  # Compress Videos in German
 compress_button.pack()
 
 # Add a Progressbar
