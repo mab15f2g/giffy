@@ -1,3 +1,4 @@
+"""This script compresses all videos in a directory to gifs using ffmpeg."""
 import os
 import subprocess
 import shutil
@@ -18,7 +19,7 @@ def gif_erstellen(datei_pfad, ziel_datei_pfad):
 
 def all_videos_to_gif(quellpfad, zielpfad):
     """Function to compress all videos in a directory"""
-    for ordnername, unterordner, dateien in os.walk(quellpfad):
+    for ordnername, _, dateien in os.walk(quellpfad):
         # Erzeuge den Zielordner, wenn er nicht vorhanden ist
         zielordner = os.path.join(zielpfad, os.path.relpath(ordnername, quellpfad))
         if not os.path.exists(zielordner):

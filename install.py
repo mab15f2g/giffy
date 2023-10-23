@@ -1,6 +1,5 @@
+"""Script to install dependencies for the application"""
 import subprocess
-
-# List of dependencies
 dependencies = [
     'tk' 
 
@@ -19,4 +18,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    
